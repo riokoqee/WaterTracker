@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  # ===========================
+  # PostgreSQL Database
+  # ===========================
+  postgres:
+    image: postgres:16
+    container_name: wt_postgres
+    environment:
+      POSTGRES_DB: waterdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mypassword123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - wt_network
+
+  # ===========================
+  # Spring Boot Backend
+  # ===========================
+  backend:
+    build: .
+    container_name: wt_backend
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/waterdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: mypassword123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_PROFILES_ACTIVE: prod
+    ports:
+      - "8080:8080"
+    networks:
+      - wt_network
+    restart: always
+
+volumes:
+  pgdata:
+
+networks:
+  wt_network:
+    driver: bridge

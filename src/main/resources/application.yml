@@ -1,0 +1,61 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/waterdb
+    username: postgres
+    password: mypassword123
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
+  # Почта для восстановления пароля
+  mail:
+    host: sandbox.smtp.mailtrap.io     # Mailtrap — тестовая почта
+    port: 2525
+    username: ${MAIL_USER}
+    password: ${MAIL_PASS}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  # Google OAuth2 авторизация
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
+
+# JWT настройки (Access + Refresh токены)
+jwt:
+  secret: "change-this-to-your-own-very-long-256-bit-secret-key"
+  accessMinutes: 60           # 1 час
+  refreshMinutes: 43200       # 30 дней
+
+# Настройки приложения
+app:
+  oauth2:
+    redirectUri: ${OAUTH2_REDIRECT:http://localhost:5173/oauth2/success}
+  frontendOrigin: ${FRONT_ORIGIN:http://localhost:5173}
+
+springdoc:
+  swagger-ui:
+    enabled: true
