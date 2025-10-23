@@ -36,7 +36,11 @@ public class JwtUtil {
 
     private String buildToken(String subject, Map<String, Object> claims, long minutes, String typ) {
         Instant now = Instant.now();
+
+        // ✅ создаём изменяемую копию, даже если пришла Map.of()
+        claims = claims == null ? new java.util.HashMap<>() : new java.util.HashMap<>(claims);
         claims.put("typ", typ);
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)

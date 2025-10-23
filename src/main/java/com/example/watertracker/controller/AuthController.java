@@ -1,16 +1,21 @@
 package com.example.watertracker.controller;
 
 import com.example.watertracker.service.AuthService;
+import com.example.watertracker.service.UserService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import org.springframework.security.core.Authentication;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService auth;
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthService.Tokens> register(@RequestBody RegisterRequest r) {
@@ -46,6 +51,21 @@ public class AuthController {
     public ResponseEntity<Void> reset(@RequestBody ResetRequest r) {
         auth.finishPasswordReset(r.token, r.newPassword);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/profile/me")
+    public ResponseEntity<?> getProfile(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
+        }
+
+        var user = userService.getByEmail(auth.getName());
+        return ResponseEntity.ok(Map.of(
+                "id", user.getId(),
+                "firstName", user.getFirstName(),
+                "lastName", user.getLastName(),
+                "email", user.getEmail()
+        ));
     }
 
     @Data public static class LoginRequest { public String email; public String password; }

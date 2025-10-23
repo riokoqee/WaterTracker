@@ -4,6 +4,7 @@ import com.example.watertracker.security.JwtAuthFilter;
 import com.example.watertracker.security.OAuth2SuccessHandler;
 import com.example.watertracker.service.AuthService;
 import com.example.watertracker.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,7 +54,24 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/", "/index.html", "/favicon.ico").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth -> oauth.successHandler(oAuth2SuccessHandler))
+
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Unauthorized or invalid credentials\"}");
+                        })
+                )
+                .oauth2Login(oauth -> oauth
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"OAuth2 login failed\"}");
+                        })
+                )
+                .formLogin(form -> form.disable())
+                .logout(logout -> logout.disable())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

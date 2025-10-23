@@ -6,13 +6,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.context.annotation.Lazy;
 
 import java.io.IOException;
 
@@ -32,33 +32,59 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
+        String path = request.getServletPath();
+        System.out.println("🟡 JwtAuthFilter triggered for: " + path); // ⬅️ перемещено в начало
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        try {
+            // ✅ Пропускаем эндпоинты, где токен не требуется
+            if (path.startsWith("/api/auth/") ||
+                    path.startsWith("/oauth2/") ||
+                    path.startsWith("/login/oauth2/") ||
+                    path.startsWith("/swagger-ui/") ||
+                    path.startsWith("/v3/api-docs")) {
 
-        jwt = authHeader.substring(7);
-        userEmail = jwtUtil.getSubject(jwt);
-
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userService.loadUserByUsername(userEmail);
-
-            if (!jwtUtil.isExpired(jwt)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                filterChain.doFilter(request, response);
+                return;
             }
-        }
 
-        filterChain.doFilter(request, response);
+            // ✅ Извлекаем заголовок Authorization
+            final String authHeader = request.getHeader("Authorization");
+
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // ✅ Извлекаем сам токен (без Bearer)
+            final String jwt = authHeader.substring(7);
+            final String userEmail = jwtUtil.getSubject(jwt);
+
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userService.loadUserByUsername(userEmail);
+
+                if (!jwtUtil.isExpired(jwt)) {
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    System.out.println("✅ Authenticated via JWT: " + userEmail);
+                } else {
+                    System.out.println("⚠️ Token expired for: " + userEmail);
+                }
+            }
+
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            System.out.println("❌ JWT filter error: " + e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Invalid or expired token\"}");
+        }
     }
 }
