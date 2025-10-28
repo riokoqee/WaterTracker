@@ -1,4 +1,6 @@
 com\example\watertracker\dto\SettingsDTOs$SettingsResponse.class
+com\example\watertracker\config\CorsConfig.class
+com\example\watertracker\controller\AuthController$RegisterRequest.class
 com\example\watertracker\repository\WaterLogRepository.class
 com\example\watertracker\model\User$UserBuilder.class
 com\example\watertracker\WaterTrackerApplication.class
@@ -36,6 +38,7 @@ com\example\watertracker\model\User.class
 com\example\watertracker\model\WaterLog.class
 com\example\watertracker\config\SecurityConfig.class
 com\example\watertracker\exception\ApiExceptionHandler.class
+com\example\watertracker\security\JsonAuthEntryPoint.class
 com\example\watertracker\dto\AuthDTOs$RegisterRequest.class
 com\example\watertracker\service\ReminderService.class
 com\example\watertracker\dto\AuthDTOs$LoginRequest.class
@@ -58,6 +61,7 @@ com\example\watertracker\controller\AuthController$ResetRequest.class
 com\example\watertracker\dto\ReminderDTOs.class
 com\example\watertracker\service\UserService.class
 com\example\watertracker\dto\GoalDTOs$GoalResponse$GoalResponseBuilder.class
+com\example\watertracker\config\MailConfig.class
 com\example\watertracker\controller\WaterController.class
 com\example\watertracker\dto\ProfileDTOs$ProfileResponse.class
 com\example\watertracker\dto\WaterDTOs$CreateLogRequest.class

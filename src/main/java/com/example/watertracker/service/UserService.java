@@ -56,6 +56,7 @@ public class UserService implements UserDetailsService {
     public void setResetToken(User u, String token, Instant expiry) {
         u.setResetToken(token);
         u.setResetTokenExpiry(expiry);
+        repo.save(u);
     }
 
     @Transactional

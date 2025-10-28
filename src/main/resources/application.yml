@@ -6,28 +6,27 @@ spring:
     url: jdbc:postgresql://localhost:5432/waterdb
     username: postgres
     password: mypassword123
+
   jpa:
     hibernate:
       ddl-auto: update
     open-in-view: false
+
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
 
-  # Почта для восстановления пароля
+  # ▼ Дефолтный sender (для тестов). Реальная отправка идёт через кастомные senders ниже.
   mail:
-    host: sandbox.smtp.mailtrap.io     # Mailtrap — тестовая почта
-    port: 2525
-    username: ${MAIL_USER}
-    password: ${MAIL_PASS}
+    host: smtp.mail.ru
+    port: 465
+    username: ${MAILRU_USER}
+    password: ${MAILRU_PASS}
     properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.ssl.enable: true
 
-  # Google OAuth2 авторизация
   security:
     oauth2:
       client:
@@ -44,13 +43,26 @@ spring:
           google:
             issuer-uri: https://accounts.google.com
 
-# JWT настройки (Access + Refresh токены)
-jwt:
-  secret: "change-this-to-your-own-very-long-256-bit-secret-key"
-  accessMinutes: 60           # 1 час
-  refreshMinutes: 43200       # 30 дней
+# ▼ Кастомные SMTP-конфиги для динамического выбора отправителя
+custom-mail:
+  gmail:
+    host: ${GMAIL_HOST:smtp.gmail.com}
+    port: ${GMAIL_PORT:587}
+    username: ${GMAIL_USER}
+    password: ${GMAIL_PASS}
+  mailru:
+    host: ${MAILRU_HOST:smtp.mail.ru}
+    port: ${MAILRU_PORT:465}
+    username: ${MAILRU_USER}
+    password: ${MAILRU_PASS}
 
-# Настройки приложения
+# JWT токены
+jwt:
+  secret: ${JWT_SECRET:change-this-to-your-own-very-long-256-bit-secret-key}
+  accessMinutes: 60         # 1 час
+  refreshMinutes: 43200     # 30 дней
+
+# Общие настройки приложения
 app:
   oauth2:
     redirectUri: ${OAUTH2_REDIRECT:http://localhost:5173/oauth2/success}
@@ -59,3 +71,10 @@ app:
 springdoc:
   swagger-ui:
     enabled: true
+
+# (Опционально) уровни логирования для отладки почты и безопасности
+logging:
+  level:
+    com.example.watertracker: INFO
+    org.springframework.mail: INFO
+    org.springframework.security: INFO

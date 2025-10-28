@@ -26,6 +26,8 @@ services:
     container_name: wt_backend
     depends_on:
       - postgres
+    env_file:
+      - .env   # 👈 подключаем все переменные окружения из .env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/waterdb
       SPRING_DATASOURCE_USERNAME: postgres

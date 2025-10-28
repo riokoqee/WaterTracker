@@ -33,36 +33,49 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String path = request.getServletPath();
-        System.out.println("🟡 JwtAuthFilter triggered for: " + path); // ⬅️ перемещено в начало
+        System.out.println("🟡 JwtAuthFilter triggered for: " + path);
 
         try {
             // ✅ Пропускаем эндпоинты, где токен не требуется
-            if (path.startsWith("/api/auth/") ||
-                    path.startsWith("/oauth2/") ||
-                    path.startsWith("/login/oauth2/") ||
-                    path.startsWith("/swagger-ui/") ||
-                    path.startsWith("/v3/api-docs")) {
+            if ((path.startsWith("/api/auth/") && !path.startsWith("/api/auth/profile"))
+                    || path.startsWith("/oauth2/")
+                    || path.startsWith("/login/oauth2/")
+                    || path.startsWith("/swagger-ui/")
+                    || path.startsWith("/v3/api-docs")) {
 
+                System.out.println("🟢 Skipping filter for public endpoint: " + path);
                 filterChain.doFilter(request, response);
                 return;
             }
 
             // ✅ Извлекаем заголовок Authorization
             final String authHeader = request.getHeader("Authorization");
-
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            if (authHeader == null) {
+                System.out.println("⚠️ Missing Authorization header");
+                filterChain.doFilter(request, response);
+                return;
+            }
+            if (!authHeader.startsWith("Bearer ")) {
+                System.out.println("⚠️ Authorization header does not start with Bearer");
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            // ✅ Извлекаем сам токен (без Bearer)
+            // ✅ Извлекаем токен и subject
             final String jwt = authHeader.substring(7);
             final String userEmail = jwtUtil.getSubject(jwt);
+            System.out.println("🔍 Extracted token subject (email): " + userEmail);
 
+            // ✅ Проверяем, не установлен ли уже контекст
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                System.out.println("🔍 Loading user from DB by email: " + userEmail);
                 UserDetails userDetails = userService.loadUserByUsername(userEmail);
 
-                if (!jwtUtil.isExpired(jwt)) {
+                System.out.println("🔍 Checking token expiration...");
+                boolean expired = jwtUtil.isExpired(jwt);
+                System.out.println("   ⏱ Token expired = " + expired);
+
+                if (!expired) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails,
@@ -72,19 +85,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                    System.out.println("✅ Authenticated via JWT: " + userEmail);
+                    System.out.println("✅ Authentication set for user: " + userEmail);
+                    System.out.println("🔎 SecurityContext now: " + SecurityContextHolder.getContext().getAuthentication());
                 } else {
-                    System.out.println("⚠️ Token expired for: " + userEmail);
+                    System.out.println("⚠️ Token expired for user: " + userEmail);
                 }
+            } else {
+                System.out.println("⚠️ userEmail is null OR context already authenticated");
+                System.out.println("🔎 SecurityContext before filter end: " + SecurityContextHolder.getContext().getAuthentication());
             }
 
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {
-            System.out.println("❌ JWT filter error: " + e.getMessage());
+            System.out.println("❌ JWT filter exception: " + e.getClass().getSimpleName() + " → " + e.getMessage());
+            e.printStackTrace();
+
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Invalid or expired token\"}");
         }
+
+        System.out.println("🟣 Filter finished for: " + path);
+        System.out.println("───────────────────────────────────────────────");
     }
 }

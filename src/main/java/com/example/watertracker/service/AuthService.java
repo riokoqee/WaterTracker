@@ -50,13 +50,20 @@ public class AuthService {
     }
 
     // --- восстановление пароля ---
+    // --- восстановление пароля ---
+    // --- восстановление пароля ---
     public void startPasswordReset(String email) {
-        User u = users.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User u = users.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         String token = UUID.randomUUID().toString();
-        users.setResetToken(u, token, Instant.now().plusSeconds(60 * 30));
+        users.setResetToken(u, token, Instant.now().plusSeconds(60 * 30)); // токен на 30 минут
+
         mailService.sendPasswordReset(u.getEmail(), token);
-        log.info("📨 Reset email sent to {}", email);
+        log.info("📨 Password reset email sent to {}", email);
     }
+
+
 
     public void finishPasswordReset(String token, String newPassword) {
         User u = users.findByResetToken(token).orElseThrow(() -> new IllegalArgumentException("Invalid token"));
