@@ -76,4 +76,34 @@ public class AuthService {
     }
 
     public record Tokens(String accessToken, String refreshToken) {}
+
+    // --- верификация email ---
+    public void startEmailVerification(String email) {
+        User u = users.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 6-значный код
+        String code = String.format("%06d", (int)(Math.random() * 1_000_000));
+        users.setVerification(u, code, Instant.now().plusSeconds(60 * 30)); // 30 минут
+        mailService.sendEmailVerification(u.getEmail(), code);
+        log.info("📨 Verification code sent to {}", email);
+    }
+
+    public void confirmEmail(String email, String code) {
+        User u = users.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (u.isEmailVerified()) return; // уже подтверждён
+
+        if (u.getVerificationCode() == null || u.getVerificationCodeExpiry() == null) {
+            throw new IllegalArgumentException("Verification not requested");
+        }
+        if (u.getVerificationCodeExpiry().isBefore(Instant.now())) {
+            throw new IllegalArgumentException("Verification code expired");
+        }
+        if (!u.getVerificationCode().equals(code)) {
+            throw new IllegalArgumentException("Invalid verification code");
+        }
+        users.markEmailVerified(u);
+        log.info("✅ Email verified for {}", email);
+    }
 }

@@ -25,14 +25,14 @@ public class DailyStatsService {
 
     public void updateSteps(User user, int steps) {
         var s = stats.findByUserIdAndDate(user.getId(), LocalDate.now());
-        if (s == null) s = new DailyStats(null, user, LocalDate.now(), steps, 0.0, 0.0, 0);
+        if (s == null) s = new DailyStats(null, user, LocalDate.now(), steps, 0.0, 0.0);
         else s.setSteps(steps);
         stats.save(s);
     }
 
     public void updateSleep(User user, double hours) {
         var s = stats.findByUserIdAndDate(user.getId(), LocalDate.now());
-        if (s == null) s = new DailyStats(null, user, LocalDate.now(), 0, 0.0, hours, 0);
+        if (s == null) s = new DailyStats(null, user, LocalDate.now(), 0, 0.0, hours);
         else s.setSleepHours(hours);
         stats.save(s);
     }

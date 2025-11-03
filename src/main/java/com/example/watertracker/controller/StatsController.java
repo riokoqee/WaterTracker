@@ -24,4 +24,18 @@ public class StatsController {
     public Map<String, Object> getWeekly(@AuthenticationPrincipal UserDetails user) {
         return stats.getWeeklyStats(user.getUsername());
     }
+
+    @PostMapping("/steps")
+    public Map<String, Object> saveSteps(
+            @AuthenticationPrincipal UserDetails user,
+            @RequestBody Map<String, Integer> body
+    ) {
+        int steps = body.getOrDefault("steps", 0);
+        stats.saveSteps(user.getUsername(), steps);
+        return Map.of(
+                "status", "ok",
+                "savedSteps", steps
+        );
+    }
+
 }

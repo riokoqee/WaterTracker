@@ -60,6 +60,21 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
+    public void setVerification(User u, String code, Instant expiry) {
+        u.setVerificationCode(code);
+        u.setVerificationCodeExpiry(expiry);
+        repo.save(u);
+    }
+
+    @Transactional
+    public void markEmailVerified(User u) {
+        u.setEmailVerified(true);
+        u.setVerificationCode(null);
+        u.setVerificationCodeExpiry(null);
+        repo.save(u);
+    }
+
+    @Transactional
     public User updateProfile(Long id, java.util.function.Consumer<User> updater) {
         User u = repo.findById(id).orElseThrow();
         updater.accept(u);

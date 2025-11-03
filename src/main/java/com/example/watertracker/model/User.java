@@ -44,4 +44,9 @@ public class User {
 
     private boolean notificationsEnabled = true;
     private boolean darkMode = false;
+
+    // Email verification
+    private boolean emailVerified = false;
+    private String verificationCode;
+    private java.time.Instant verificationCodeExpiry;
 }

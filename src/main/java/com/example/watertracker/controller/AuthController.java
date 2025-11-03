@@ -71,4 +71,19 @@ public class AuthController {
     @Data public static class LoginRequest { public String email; public String password; }
     @Data public static class EmailRequest { public String email; }
     @Data public static class ResetRequest { public String token; public String newPassword; }
+
+    // --- Email verification ---
+    @PostMapping("/verify-email/send")
+    public ResponseEntity<?> sendVerification(@RequestBody EmailRequest r) {
+        auth.startEmailVerification(r.email);
+        return ResponseEntity.ok(Map.of("status", "sent"));
+    }
+
+    @PostMapping("/verify-email/confirm")
+    public ResponseEntity<?> confirmVerification(@RequestBody VerifyRequest r) {
+        auth.confirmEmail(r.email, r.code);
+        return ResponseEntity.ok(Map.of("status", "verified"));
+    }
+
+    @Data public static class VerifyRequest { public String email; public String code; }
 }

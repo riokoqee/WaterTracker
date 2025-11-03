@@ -22,5 +22,4 @@ public class DailyStats {
     private Integer steps;
     private Double calories;
     private Double sleepHours;
-    private Integer heartRate;
 }

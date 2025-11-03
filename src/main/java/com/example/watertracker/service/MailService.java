@@ -47,4 +47,31 @@ public class MailService {
             System.out.println("❌ Failed to send email: " + e.getMessage());
         }
     }
+
+    public void sendEmailVerification(String to, String code) {
+        String text = """
+            Привет!
+
+            Ваш код подтверждения email для WaterTracker:
+
+            %s
+
+            Код действует 30 минут. Если вы не запрашивали подтверждение, просто игнорируйте это письмо.
+
+            Команда WaterTracker
+            """.formatted(code);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setFrom(fromAddress);
+        message.setSubject("Код подтверждения — WaterTracker");
+        message.setText(text);
+
+        try {
+            mailSender.send(message);
+            System.out.println("📨 Verification code sent to " + to);
+        } catch (Exception e) {
+            System.out.println("❌ Failed to send verification email: " + e.getMessage());
+        }
+    }
 }

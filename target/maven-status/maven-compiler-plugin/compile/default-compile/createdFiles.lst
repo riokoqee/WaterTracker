@@ -11,17 +11,20 @@ com\example\watertracker\dto\DashboardResponse$DashboardResponseBuilder.class
 com\example\watertracker\security\OAuth2SuccessHandler.class
 com\example\watertracker\controller\AuthController$EmailRequest.class
 com\example\watertracker\model\DailyStats.class
+com\example\watertracker\controller\GoalController$UpsertGoalRequest.class
 com\example\watertracker\dto\AuthDTOs$GoogleLoginRequest.class
 com\example\watertracker\exception\GlobalExceptionHandler.class
 com\example\watertracker\service\DashboardService.class
 com\example\watertracker\dto\DashboardResponse.class
 com\example\watertracker\controller\StatsController.class
+com\example\watertracker\controller\WaterController$WaterLogResponse.class
 com\example\watertracker\dto\ReminderDTOs$ReminderResponse$ReminderResponseBuilder.class
 com\example\watertracker\repository\DailyStatsRepository.class
 com\example\watertracker\controller\AuthController.class
 com\example\watertracker\dto\WaterDTOs.class
 com\example\watertracker\dto\WaterDTOs$WaterStats8Days$WaterStats8DaysBuilder.class
 com\example\watertracker\dto\AuthDTOs$TokenResponse.class
+com\example\watertracker\controller\WaterController$TodayProgressResponse.class
 com\example\watertracker\dto\ReminderDTOs$ReminderResponse.class
 com\example\watertracker\dto\WaterDTOs$WaterStats8Days.class
 com\example\watertracker\controller\AuthController$LoginRequest.class
@@ -30,10 +33,12 @@ com\example\watertracker\security\JwtUtil.class
 com\example\watertracker\dto\SettingsDTOs$ChangePasswordRequest.class
 com\example\watertracker\controller\WaterLogController.class
 com\example\watertracker\service\SettingsService.class
+com\example\watertracker\controller\AuthController$VerifyRequest.class
 com\example\watertracker\service\DailyStatsService.class
 com\example\watertracker\dto\SettingsDTOs$SettingsResponse$SettingsResponseBuilder.class
 com\example\watertracker\controller\ProfileController.class
 com\example\watertracker\model\Role.class
+com\example\watertracker\controller\WaterController$CreateLogRequest.class
 com\example\watertracker\model\User.class
 com\example\watertracker\model\WaterLog.class
 com\example\watertracker\config\SecurityConfig.class
@@ -71,6 +76,7 @@ com\example\watertracker\controller\ReminderController.class
 com\example\watertracker\controller\DashboardController.class
 com\example\watertracker\model\DailyStats$DailyStatsBuilder.class
 com\example\watertracker\service\AuthService$Tokens.class
+com\example\watertracker\controller\WaterController$DrinkRequest.class
 com\example\watertracker\dto\ReminderDTOs$AddReminderRequest.class
 com\example\watertracker\dto\GoalDTOs$GoalResponse.class
 com\example\watertracker\repository\DailyGoalRepository.class
@@ -81,4 +87,5 @@ com\example\watertracker\service\AuthService.class
 com\example\watertracker\dto\WaterDTOs$WaterLogResponse$WaterLogResponseBuilder.class
 com\example\watertracker\dto\WaterDTOs$WaterLogResponse.class
 com\example\watertracker\dto\AuthDTOs.class
+com\example\watertracker\controller\GoalController$GoalResponse.class
 com\example\watertracker\model\Reminder$ReminderBuilder.class

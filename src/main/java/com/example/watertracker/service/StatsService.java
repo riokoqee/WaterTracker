@@ -1,9 +1,11 @@
 package com.example.watertracker.service;
 
+import com.example.watertracker.model.DailyStats;
 import com.example.watertracker.model.User;
 import com.example.watertracker.model.WaterLog;
 import com.example.watertracker.repository.UserRepository;
 import com.example.watertracker.repository.WaterLogRepository;
+import com.example.watertracker.repository.DailyStatsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ public class StatsService {
 
     private final UserRepository users;
     private final WaterLogRepository logs;
+    private final DailyStatsRepository statsRepo;
 
     public Map<String, Object> getDailyStats(String email) {
         User user = users.findByEmail(email).orElseThrow();
@@ -45,4 +48,24 @@ public class StatsService {
                 "entries", weekLogs.size()
         );
     }
+
+    public void saveSteps(String email, int steps) {
+        User user = users.findByEmail(email).orElseThrow();
+        var today = statsRepo.findByUserIdAndDate(user.getId(), LocalDate.now());
+
+        if (today == null) {
+            today = DailyStats.builder()
+                    .user(user)
+                    .date(LocalDate.now())
+                    .steps(steps)
+                    .calories(0.0)
+                    .sleepHours(0.0)
+                    .build();
+        } else {
+            today.setSteps(steps);
+        }
+
+        statsRepo.save(today);
+    }
+
 }

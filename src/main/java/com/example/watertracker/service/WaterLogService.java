@@ -1,5 +1,6 @@
 package com.example.watertracker.service;
 
+import com.example.watertracker.model.DailyGoal;
 import com.example.watertracker.model.User;
 import com.example.watertracker.model.WaterLog;
 import com.example.watertracker.repository.UserRepository;
@@ -68,5 +69,31 @@ public class WaterLogService {
         log.setUser(user);
         log.setDate(LocalDate.now());
         return repo.save(log);
+    }
+
+    public Map<String, Object> drink(String email, int amountMl) {
+        User user = users.findByEmail(email).orElseThrow();
+
+        // Записываем лог
+        create(user.getId(), amountMl, "glass", OffsetDateTime.now());
+
+        // Возвращаем текущий прогресс за сегодня
+        OffsetDateTime start = OffsetDateTime.now().toLocalDate().atStartOfDay().atOffset(OffsetDateTime.now().getOffset());
+        OffsetDateTime end = start.plusDays(1);
+        int consumed = repo.sumToday(user.getId(), start, end);
+
+        int target = 2000;
+        var goal = repoGoal(user.getId()); // небольшой helper ниже
+        if (goal != null && goal.getTargetMl() != null) target = goal.getTargetMl();
+
+        return Map.of("consumedMl", consumed, "targetMl", target);
+    }
+
+    // helper: вытащить цель (необязательно, но удобно)
+    private DailyGoal repoGoal(Long userId) {
+        // Лучше инжектнуть DailyGoalRepository в этот сервис,
+        // или получить через GoalService (если уже помечен @Service)
+        // Простой вариант: через контекст, но рекомендуется именно инжект.
+        return null; // закомментируй или переделай, если решишь использовать GoalService в контроллере.
     }
 }
