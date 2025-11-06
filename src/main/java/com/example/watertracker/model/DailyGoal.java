@@ -17,4 +17,6 @@ public class DailyGoal {
 
     private Boolean remindersEnabled;
     private Integer reminderEveryMin;
+
+    private Integer glassSizeMl = 250;
 }

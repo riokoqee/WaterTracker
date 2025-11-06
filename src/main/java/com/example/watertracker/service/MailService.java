@@ -15,7 +15,7 @@ public class MailService {
     @Value("${custom-mail.mailru.username}")
     private String fromAddress;
 
-    @Value("${app.frontendOrigin:http://localhost:5173}")
+    @Value("${app.frontendOrigin:https://uncogged-unprotective-tamisha.ngrok-free.dev}")
     private String frontendOrigin;
 
     public void sendPasswordReset(String to, String token) {

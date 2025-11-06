@@ -43,7 +43,7 @@ public class SecurityConfig {
             OAuth2SuccessHandler oAuth2SuccessHandler
     ) throws Exception {
         return http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ добавлено
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
@@ -106,7 +106,7 @@ public class SecurityConfig {
 
         config.setAllowCredentials(true);
         config.setAllowedOrigins(List.of(
-                "http://localhost:5173",
+                "https://uncogged-unprotective-tamisha.ngrok-free.dev",
                 "http://127.0.0.1:5173"
         ));
         config.setAllowedHeaders(List.of(

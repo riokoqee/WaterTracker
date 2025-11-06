@@ -35,12 +35,14 @@ public class GoalController {
 
     @Data public static class UpsertGoalRequest {
         public Integer targetMl;          // 2000 и т.п.
+        public Integer glassSizeMl;
         public Boolean remindersEnabled;  // true/false
         public Integer reminderEveryMin;  // 60 и т.п.
     }
 
     @Data public static class GoalResponse {
         public final Integer targetMl;
+        public Integer glassSizeMl;
         public final Boolean remindersEnabled;
         public final Integer reminderEveryMin;
     }
