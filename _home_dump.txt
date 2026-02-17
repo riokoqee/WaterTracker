@@ -1,0 +1,196 @@
+﻿import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
+import '../widgets/water_level_indicator.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  double currentWater = 500; // РўРµРєСѓС‰РµРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РІРѕРґС‹
+  double goalWater = 2000; // Р¦РµР»СЊ РїРѕ РІРѕРґРµ
+  double get percent => (currentWater / goalWater).clamp(0.0, 1.0);
+
+  void addWater(double ml) {
+    setState(() {
+      currentWater += ml;
+      if (currentWater > goalWater) currentWater = goalWater;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // рџ”№ РџСЂРёРІРµС‚СЃС‚РІРёРµ
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        "Р”РѕР±СЂРѕРµ СѓС‚СЂРѕ,",
+                        style: TextStyle(
+                          fontFamily: "MinecraftRus",
+                          color: AppColors.textGray,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        "РђРЅСЃР°СЂ РњСѓСЂР°С‚ рџ’§",
+                        style: TextStyle(
+                          fontFamily: "MinecraftRus",
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 22,
+                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                        child: const Icon(Icons.notifications_none,
+                            color: AppColors.primary),
+                      ),
+                      Positioned(
+                        right: 6,
+                        top: 6,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 28),
+
+              // рџ”№ РљР°СЂС‚РѕС‡РєР° С†РµР»Рё
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, Color(0xFF56C3FF)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            "11:00 СѓС‚СЂР°",
+                            style: TextStyle(
+                              fontFamily: "MinecraftRus",
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            "200 РјР» РІРѕРґС‹ (1 СЃС‚Р°РєР°РЅ)",
+                            style: TextStyle(
+                              fontFamily: "MinecraftRus",
+                              color: Colors.white70,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Image.asset(
+                      "assets/images/drop_large.png",
+                      height: 60,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // рџ”№ РРЅРґРёРєР°С‚РѕСЂ РІРѕРґС‹
+              Center(child: WaterLevelIndicator(progress: percent)),
+
+              const SizedBox(height: 28),
+
+              // рџ”№ РљРЅРѕРїРєР° РґРѕР±Р°РІР»РµРЅРёСЏ РІРѕРґС‹
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => addWater(200),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 6,
+                  ),
+                  child: const Text(
+                    "Р’С‹РїРёР» СЃС‚Р°РєР°РЅ рџ’§",
+                    style: TextStyle(
+                      fontFamily: "MinecraftRus",
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // рџ”№ РџРѕРґРїРёСЃСЊ РїРѕРґ РєРЅРѕРїРєРѕР№
+              Center(
+                child: Text(
+                  percent >= 1.0
+                      ? "РћС‚Р»РёС‡РЅРѕ! РўС‹ РґРѕСЃС‚РёРі С†РµР»Рё рџ’Є"
+                      : "РўС‹ РґРѕСЃС‚РёРі ${(percent * 100).toInt()}% СЃРІРѕРµР№ С†РµР»Рё!",
+                  style: const TextStyle(
+                    fontFamily: "MinecraftRus",
+                    fontSize: 13,
+                    color: AppColors.textGray,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+

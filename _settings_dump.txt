@@ -1,0 +1,155 @@
+﻿import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
+
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _isDarkMode = false;
+  String _unit = "РјР»";
+  int _goal = 2000;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text(
+          "РќР°СЃС‚СЂРѕР№РєРё",
+          style: TextStyle(
+            fontFamily: "MinecraftRus",
+            color: AppColors.textDark,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        children: [
+          const Text(
+            "РћР±С‰РёРµ",
+            style: TextStyle(
+              fontFamily: "MinecraftRus",
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textDark,
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // РўРµРјР°
+          _buildSettingTile(
+            title: "РўРµРјР° РёРЅС‚РµСЂС„РµР№СЃР°",
+            trailing: Switch(
+              value: _isDarkMode,
+              activeColor: AppColors.primary,
+              onChanged: (v) {
+                setState(() => _isDarkMode = v);
+              },
+            ),
+          ),
+
+          // Р•РґРёРЅРёС†С‹
+          _buildSettingTile(
+            title: "Р•РґРёРЅРёС†С‹ РёР·РјРµСЂРµРЅРёСЏ",
+            trailing: DropdownButton<String>(
+              value: _unit,
+              dropdownColor: Colors.white,
+              underline: const SizedBox(),
+              style: const TextStyle(
+                fontFamily: "MinecraftRus",
+                fontSize: 14,
+                color: AppColors.textDark,
+              ),
+              items: const [
+                DropdownMenuItem(value: "РјР»", child: Text("РјР»")),
+                DropdownMenuItem(value: "Р»", child: Text("Р»")),
+              ],
+              onChanged: (v) => setState(() => _unit = v!),
+            ),
+          ),
+
+          // Р¦РµР»СЊ
+          _buildSettingTile(
+            title: "Р¦РµР»СЊ РїРѕ РІРѕРґРµ",
+            trailing: GestureDetector(
+              onTap: () async {
+                final controller = TextEditingController(text: _goal.toString());
+                final result = await showDialog<int>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Р’РІРµРґРёС‚Рµ С†РµР»СЊ (РІ РјР»):"),
+                    content: TextField(
+                      controller: controller,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, int.tryParse(controller.text));
+                        },
+                        child: const Text("OK"),
+                      ),
+                    ],
+                  ),
+                );
+                if (result != null) setState(() => _goal = result);
+              },
+              child: Text(
+                "$_goal РјР»",
+                style: const TextStyle(
+                  fontFamily: "MinecraftRus",
+                  fontSize: 14,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingTile({required String title, required Widget trailing}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontFamily: "MinecraftRus",
+              fontSize: 14,
+              color: AppColors.textDark,
+            ),
+          ),
+          trailing,
+        ],
+      ),
+    );
+  }
+}
+

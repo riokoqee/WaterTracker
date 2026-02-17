@@ -1,0 +1,169 @@
+﻿import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
+
+class HistoryScreen extends StatefulWidget {
+  const HistoryScreen({super.key});
+
+  @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  // Р—Р°РіР»СѓС€РєР° РїРѕРґ Р±СѓРґСѓС‰РёРµ РґР°РЅРЅС‹Рµ СЃ Р±СЌРєР°
+  final Map<String, dynamic> _stats = {
+    "weeklyAvg": 0,
+    "monthlyAvg": 0,
+    "completion": 0,
+    "frequency": 0,
+  };
+
+  // РРјРёС‚Р°С†РёСЏ РґРЅРµР№ РЅРµРґРµР»Рё (РІ Р±СѓРґСѓС‰РµРј СЃ backend)
+  final List<bool> _weekProgress = [true, true, true, true, false, false, false];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text(
+          "РСЃС‚РѕСЂРёСЏ",
+          style: TextStyle(
+            fontFamily: "MinecraftRus",
+            color: AppColors.textDark,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Р’РµСЂС…РЅСЏСЏ РїР°РЅРµР»СЊ РЅРµРґРµР»Рё
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Р’С‹РїРѕР»РЅРµРЅРёРµ Р·Р° РЅРµРґРµР»СЋ",
+                    style: TextStyle(
+                      fontFamily: "MinecraftRus",
+                      fontSize: 14,
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(7, (index) {
+                      // ignore: unused_local_variable
+                      final days = ["РџРЅ", "Р’С‚", "РЎСЂ", "Р§С‚", "РџС‚", "РЎР±", "Р’СЃ"];
+                      return CircleAvatar(
+                        radius: 18,
+                        backgroundColor: _weekProgress[index]
+                            ? AppColors.primary
+                            : Colors.grey.shade300,
+                        child: Icon(
+                          _weekProgress[index]
+                              ? Icons.check
+                              : Icons.circle_outlined,
+                          color: _weekProgress[index]
+                              ? Colors.white
+                              : Colors.grey,
+                          size: 18,
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Р—Р°РіРѕР»РѕРІРѕРє "РћС‚С‡С‘С‚"
+            const Text(
+              "РћС‚С‡С‘С‚ РїРѕ РІРѕРґРµ",
+              style: TextStyle(
+                fontFamily: "MinecraftRus",
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            Expanded(
+              child: ListView(
+                children: [
+                  _buildStatRow(
+                    "РЎСЂРµРґРЅРµРµ Р·Р° РЅРµРґРµР»СЋ",
+                    "${_stats['weeklyAvg']} РјР» / РґРµРЅСЊ",
+                    Colors.green,
+                  ),
+                  _buildStatRow(
+                    "РЎСЂРµРґРЅРµРµ Р·Р° РјРµСЃСЏС†",
+                    "${_stats['monthlyAvg']} РјР» / РґРµРЅСЊ",
+                    Colors.blue,
+                  ),
+                  _buildStatRow(
+                    "РЎСЂРµРґРЅРёР№ РїСЂРѕС†РµРЅС‚ РІС‹РїРѕР»РЅРµРЅРёСЏ",
+                    "${_stats['completion']}%",
+                    Colors.orange,
+                  ),
+                  _buildStatRow(
+                    "Р§Р°СЃС‚РѕС‚Р° РїРёС‚СЊСЏ",
+                    "${_stats['frequency']} СЂР°Р· / РґРµРЅСЊ",
+                    Colors.red,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatRow(String title, String value, Color dotColor) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.circle, color: dotColor, size: 10),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontFamily: "MinecraftRus",
+                  fontSize: 14,
+                  color: AppColors.textDark,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontFamily: "MinecraftRus",
+              fontSize: 13,
+              color: AppColors.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

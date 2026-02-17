@@ -1,0 +1,98 @@
+﻿import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
+import 'edit_profile_screen.dart';
+
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    const user = {
+      "firstName": "РђРЅСЃР°СЂ",
+      "lastName": "РњСѓСЂР°С‚",
+      "email": "ansar.murat@gmail.com",
+      "age": "17",
+      "gender": "РњСѓР¶СЃРєРѕР№",
+      "avatar": "assets/images/default_avatar.png"
+    };
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false, // в¬…пёЏ СѓР±СЂР°Р»Рё СЃС‚СЂРµР»РєСѓ В«РЅР°Р·Р°РґВ»
+        title: const Text(
+          "РњРѕР№ РїСЂРѕС„РёР»СЊ",
+          style: TextStyle(
+            fontFamily: "MinecraftRus",
+            color: AppColors.textDark,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit, color: AppColors.primary),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            CircleAvatar(
+              radius: 50,
+              backgroundImage: AssetImage(user["avatar"]!),
+            ),
+            const SizedBox(height: 24),
+            _buildField("РРјСЏ", user["firstName"]!),
+            _buildField("Р¤Р°РјРёР»РёСЏ", user["lastName"]!),
+            _buildField("Email", user["email"]!),
+            _buildField("Р’РѕР·СЂР°СЃС‚", user["age"]!),
+            _buildField("РџРѕР»", user["gender"]!),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField(String label, String value) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label,
+              style: const TextStyle(
+                fontFamily: "MinecraftRus",
+                fontSize: 12,
+                color: AppColors.textGray,
+              )),
+          const SizedBox(height: 4),
+          Text(value,
+              style: const TextStyle(
+                fontFamily: "MinecraftRus",
+                fontSize: 15,
+                color: AppColors.textDark,
+                fontWeight: FontWeight.bold,
+              )),
+        ],
+      ),
+    );
+  }
+}
+

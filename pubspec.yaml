@@ -1,0 +1,50 @@
+name: water_tracker
+description: "WaterTracker project"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.5+1
+  http: ^1.5.0
+  fl_chart: ^0.64.0
+  shared_preferences: ^2.2.3
+  pedometer: ^3.0.0
+  permission_handler: ^11.3.1
+  percent_indicator: ^4.2.3
+  smooth_page_indicator: ^1.1.0
+  audioplayers: ^6.0.0
+  vibration: ^3.1.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+    - family: MinecraftRus
+      fonts:
+        - asset: assets/fonts/minecraft_0.ttf
+  assets:
+    - assets/images/splash_logo.png
+    - assets/images/onboard1.png
+    - assets/images/onboard2.png
+    - assets/images/onboard3.png
+    - assets/images/drop_large.png
+    - assets/sounds/drop.mp3
+    - assets/images/default_avatar.png
+    - assets/images/minecraft_sign.png
+

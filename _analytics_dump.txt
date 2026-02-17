@@ -1,0 +1,393 @@
+﻿import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
+import '../theme/app_colors.dart';
+import '../api/api_client.dart';
+import '../api/water_api.dart';
+
+class AnalyticsScreen extends StatelessWidget {
+  const AnalyticsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text(
+          'РђРЅР°Р»РёС‚РёРєР°',
+          style: TextStyle(
+            fontFamily: 'MinecraftRus',
+            color: AppColors.textDark,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        child: Column(
+          children: const [
+            Expanded(
+              flex: 2,
+              child: _TopRow(),
+            ),
+            SizedBox(height: 10),
+            Expanded(
+              flex: 2,
+              child: _BottomRow(),
+            ),
+            SizedBox(height: 10),
+            Expanded(
+              flex: 1,
+              child: RandomTipCard(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TopRow extends StatelessWidget {
+  const _TopRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: const [
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: 6),
+            child: _WaterChartCard(),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(left: 6),
+            child: _StepsCard(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BottomRow extends StatelessWidget {
+  const _BottomRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: const [
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: 6),
+            child: _AnalyticsCard(
+              title: 'РљР°Р»РѕСЂРёРё',
+              value: '1320',
+              unit: 'РєРєР°Р»',
+              icon: Icons.local_fire_department,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(left: 6),
+            child: _AnalyticsCard(
+              title: 'РЎРѕРЅ',
+              value: '7 С‡',
+              unit: 'РІС‡РµСЂР°',
+              icon: Icons.nightlight_round,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _WaterChartCard extends StatefulWidget {
+  const _WaterChartCard();
+
+  @override
+  State<_WaterChartCard> createState() => _WaterChartCardState();
+}
+
+class _WaterChartCardState extends State<_WaterChartCard> {
+  final _api = ApiClient();
+  late final WaterApi _water = WaterApi(_api);
+  List<String> _labels = const [];
+  List<int> _totals = const [];
+  int _target = 2000;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final s = await _water.stats8Days();
+      if (!mounted) return;
+      setState(() {
+        _labels = s.labels;
+        _totals = s.totalsMl;
+        _target = s.targetMl;
+        _loading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: _loading
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Р’РѕРґР° Р·Р° 8 РґРЅРµР№',
+                  style: TextStyle(
+                    fontFamily: 'MinecraftRus',
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Expanded(
+                  child: BarChart(
+                    BarChartData(
+                      barTouchData: BarTouchData(enabled: false),
+                      gridData: FlGridData(show: false),
+                      borderData: FlBorderData(show: false),
+                      titlesData: FlTitlesData(
+                        leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: (value, meta) {
+                              final i = value.toInt();
+                              if (i < 0 || i >= _labels.length) return const SizedBox.shrink();
+                              final lbl = _labels[i];
+                              final short = lbl.length >= 5 ? lbl.substring(5) : lbl; // MM-dd
+                              return Text(short, style: const TextStyle(fontFamily: 'MinecraftRus', fontSize: 10));
+                            },
+                          ),
+                        ),
+                      ),
+                      barGroups: [
+                        for (int i = 0; i < _labels.length; i++)
+                          BarChartGroupData(
+                            x: i,
+                            barRods: [
+                              BarChartRodData(
+                                toY: _totals[i].toDouble(),
+                                width: 14,
+                                color: AppColors.primary.withOpacity(0.9),
+                                borderRadius: BorderRadius.circular(6),
+                                backDrawRodData: BackgroundBarChartRodData(
+                                  show: true,
+                                  toY: _target.toDouble(),
+                                  color: Colors.grey.shade200,
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+class _StepsCard extends StatelessWidget {
+  const _StepsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text(
+            'РЁР°РіРё (РїСЂРёРјРµСЂ)',
+            style: TextStyle(
+              fontFamily: 'MinecraftRus',
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textDark,
+            ),
+          ),
+          SizedBox(height: 12),
+          Text(
+            'РРЅС‚РµРіСЂР°С†РёСЏ СЃРѕ Р·РґРѕСЂРѕРІСЊРµРј РјРѕР¶РµС‚ Р±С‹С‚СЊ РґРѕР±Р°РІР»РµРЅР° РїРѕР·Р¶Рµ.',
+            style: TextStyle(fontFamily: 'MinecraftRus', fontSize: 12, color: AppColors.textGray),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnalyticsCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final String unit;
+  final IconData icon;
+  const _AnalyticsCard({
+    required this.title,
+    required this.value,
+    required this.unit,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontFamily: 'MinecraftRus',
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textDark,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Icon(Icons.insights, size: 22, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontFamily: 'MinecraftRus',
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  Text(
+                    unit,
+                    style: const TextStyle(
+                      fontFamily: 'MinecraftRus',
+                      fontSize: 12,
+                      color: AppColors.textGray,
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class RandomTipCard extends StatefulWidget {
+  const RandomTipCard({super.key});
+
+  @override
+  State<RandomTipCard> createState() => _RandomTipCardState();
+}
+
+class _RandomTipCardState extends State<RandomTipCard> {
+  static final List<String> tips = [
+    'РџРµР№С‚Рµ РІРѕРґСѓ СЂРµРіСѓР»СЏСЂРЅРѕ РІ С‚РµС‡РµРЅРёРµ РґРЅСЏ',
+    'РЎС‚Р°СЂР°Р№С‚РµСЃСЊ РїРёС‚СЊ РїРµСЂРµРґ РєР°Р¶РґРѕР№ РµРґРѕР№',
+    'Р”РµСЂР¶РёС‚Рµ Р±СѓС‚С‹Р»РєСѓ РІРѕРґС‹ СЂСЏРґРѕРј вЂ” СЌС‚Рѕ РїРѕРјРѕРіР°РµС‚',
+    'Р”РѕР±Р°РІР»СЏР№С‚Рµ Р»РѕРјС‚РёРє Р»РёРјРѕРЅР°, РµСЃР»Рё С…РѕС‡РµС‚СЃСЏ РІРєСѓСЃР°',
+    'РќРµР±РѕР»СЊС€РёРµ РїРѕСЂС†РёРё, РЅРѕ С‡Р°СЃС‚Рѕ вЂ” С…РѕСЂРѕС€РёР№ РїРѕРґС…РѕРґ',
+  ];
+
+  late String _tip = tips.first;
+
+  @override
+  void initState() {
+    super.initState();
+    _tip = (tips..shuffle()).first;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.tips_and_updates, color: AppColors.primary),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              _tip,
+              style: const TextStyle(
+                fontFamily: 'MinecraftRus',
+                fontSize: 13,
+                color: AppColors.textDark,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+

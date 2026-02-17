@@ -1,0 +1,297 @@
+﻿import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import '../../theme/app_colors.dart';
+import '../main_navigation.dart';
+import '../../transitions/water_page_route.dart';
+import 'register_screen.dart';
+import '../../widgets/animated_wave.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+  final _email = TextEditingController();
+  final _pass  = TextEditingController();
+  bool _visible = false;
+  bool _loading = false;
+
+  late final AnimationController _float;
+  late final Animation<double> _floatAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _float = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat(reverse: true);
+
+    _floatAnim = Tween(begin: -5.0, end: 5.0)
+        .chain(CurveTween(curve: Curves.easeInOut))
+        .animate(_float);
+  }
+
+  @override
+  void dispose() {
+    _float.dispose();
+    _email.dispose();
+    _pass.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onLogin() async {
+    if (_loading) return;
+    setState(() => _loading = true);
+
+    // РёРјРёС‚Р°С†РёСЏ Р·Р°РїСЂРѕСЃР°
+    await Future.delayed(const Duration(milliseconds: 300));
+    if (!mounted) return;
+
+    setState(() => _loading = false);
+
+    Navigator.of(context).pushReplacement(
+      WaterPageRoute(builder: (_) => const MainNavigation()),
+    );
+  }
+
+  Future<void> _forgotPasswordDialog() async {
+    final c = TextEditingController();
+    bool sending = false;
+    String? info, err;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          backgroundColor: AppColors.background,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          title: const Text(
+            "Р’РѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёРµ РїР°СЂРѕР»СЏ",
+            style: TextStyle(fontFamily: "MinecraftRus", fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Р’РІРµРґРёС‚Рµ email вЂ” РѕС‚РїСЂР°РІРёРј СЃСЃС‹Р»РєСѓ РґР»СЏ СЃР±СЂРѕСЃР°.",
+                style: TextStyle(fontFamily: "MinecraftRus", fontSize: 13, color: AppColors.textGray),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: c,
+                keyboardType: TextInputType.emailAddress,
+                style: const TextStyle(fontFamily: "MinecraftRus"),
+                decoration: InputDecoration(
+                  hintText: "example@mail.com",
+                  hintStyle: const TextStyle(fontFamily: "MinecraftRus"),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (sending)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 6),
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                )
+              else
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (c.text.isEmpty) return;
+                      setState(() { sending = true; info = null; err = null; });
+                      try {
+                        final r = await http.post(
+                          Uri.parse("http://localhost:8080/api/auth/forgot-password"),
+                          headers: {"Content-Type": "application/json"},
+                          body: jsonEncode({"email": c.text}),
+                        );
+                        if (r.statusCode == 200) {
+                          setState(() => info = "РџРёСЃСЊРјРѕ РѕС‚РїСЂР°РІР»РµРЅРѕ. РџСЂРѕРІРµСЂСЊС‚Рµ РїРѕС‡С‚Сѓ вњ‰пёЏ");
+                        } else {
+                          setState(() => err = "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РїСЂР°РІРёС‚СЊ РїРёСЃСЊРјРѕ. РџСЂРѕРІРµСЂСЊС‚Рµ email.");
+                        }
+                      } catch (_) {
+                        setState(() => err = "РќРµС‚ СЃРѕРµРґРёРЅРµРЅРёСЏ СЃ СЃРµСЂРІРµСЂРѕРј.");
+                      } finally {
+                        setState(() => sending = false);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: const Text(
+                      "РћС‚РїСЂР°РІРёС‚СЊ",
+                      style: TextStyle(fontFamily: "MinecraftRus", color: Colors.white),
+                    ),
+                  ),
+                ),
+              if (info != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(info!, style: const TextStyle(fontFamily: "MinecraftRus", color: Colors.green)),
+                ),
+              if (err != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(err!, style: const TextStyle(fontFamily: "MinecraftRus", color: Colors.red)),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint, {Widget? suffix}) =>
+      InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(fontFamily: "MinecraftRus"),
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          // рџЊЉ Р”РµРєРѕСЂР°С‚РёРІРЅС‹Рµ РІРѕР»РЅС‹ СЃРЅРёР·Сѓ
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                AnimatedWave(color: AppColors.accent, height: 90, offset: 0),
+                AnimatedWave(color: AppColors.primary, height: 100, offset: 1),
+              ],
+            ),
+          ),
+
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 60),
+              child: Column(
+                children: [
+                  // В«РџР»Р°РІР°СЋС‰РёР№В» Р»РѕРіРѕС‚РёРї
+                  AnimatedBuilder(
+                    animation: _floatAnim,
+                    builder: (_, child) => Transform.translate(
+                      offset: Offset(0, _floatAnim.value),
+                      child: child,
+                    ),
+                    child: Image.asset("assets/images/splash_logo.png", height: 90),
+                  ),
+                  const SizedBox(height: 20),
+
+                  const Text(
+                    "Р’С…РѕРґ РІ Water Tracker",
+                    style: TextStyle(
+                      fontFamily: "MinecraftRus",
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+
+                  TextField(
+                    controller: _email,
+                    style: const TextStyle(fontFamily: "MinecraftRus"),
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: _inputDecoration("Р’РІРµРґРёС‚Рµ РІР°С€ email"),
+                  ),
+                  const SizedBox(height: 16),
+
+                  TextField(
+                    controller: _pass,
+                    obscureText: !_visible,
+                    style: const TextStyle(fontFamily: "MinecraftRus"),
+                    decoration: _inputDecoration(
+                      "Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ",
+                      suffix: IconButton(
+                        icon: Icon(_visible ? Icons.visibility_off : Icons.visibility,
+                            color: AppColors.textGray),
+                        onPressed: () => setState(() => _visible = !_visible),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _forgotPasswordDialog,
+                      style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                      child: const Text(
+                        "Р—Р°Р±С‹Р»Рё РїР°СЂРѕР»СЊ?",
+                        style: TextStyle(
+                          fontFamily: "MinecraftRus",
+                          color: AppColors.primary,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _loading ? null : _onLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        _loading ? "Р’С…РѕРґРёРј..." : "Р’РћР™РўР",
+                        style: const TextStyle(
+                          fontFamily: "MinecraftRus",
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                    ),
+                    child: const Text(
+                      "РќРµС‚ Р°РєРєР°СѓРЅС‚Р°? Р—Р°СЂРµРіРёСЃС‚СЂРёСЂСѓР№С‚РµСЃСЊ",
+                      style: TextStyle(fontFamily: "MinecraftRus", color: AppColors.primary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
